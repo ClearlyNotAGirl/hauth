@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 554c2dddafefbc1d792ece1338a4ed6868b65e9e54e702c82e4a9061decefc55
+-- hash: 87b26ece364cbff1ef8f9fa7d5a057616b0660b5ebb0233e8fba851a97fad4ca
 
 name:           hauth
 version:        0.1.0.0
@@ -32,8 +32,10 @@ library
       Paths_hauth
   hs-source-dirs:
       src
+  default-extensions: NoImplicitPrelude OverloadedStrings
   build-depends:
       base >=4.7 && <5
+    , classy-prelude
   default-language: Haskell2010
 
 executable hauth-exe
@@ -42,9 +44,11 @@ executable hauth-exe
       Paths_hauth
   hs-source-dirs:
       app
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , classy-prelude
     , hauth
   default-language: Haskell2010
 
@@ -55,8 +59,10 @@ test-suite hauth-test
       Paths_hauth
   hs-source-dirs:
       test
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , classy-prelude
     , hauth
   default-language: Haskell2010
