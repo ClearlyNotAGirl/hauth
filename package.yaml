@@ -28,6 +28,7 @@ dependencies:
 - aeson
 - safe-exceptions
 - template-haskell
+- mtl
 
 default-extensions:
 - NoImplicitPrelude
