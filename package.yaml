@@ -41,6 +41,7 @@ default-extensions:
 - FlexibleContexts
 - GeneralizedNewtypeDeriving
 - TemplateHaskell
+- ScopedTypeVariables
 
 library:
   source-dirs: src

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7dd8cd0022029103ff7590a000327d06c699cbb8fa622bfcba53adcbfd3f1310
+-- hash: 0380863282982edfa0a44fa4e95e9760941c15899260d9d9416dd8df6b51838d
 
 name:           hauth
 version:        0.1.0.0
@@ -35,7 +35,7 @@ library
       Paths_hauth
   hs-source-dirs:
       src
-  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell
+  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell ScopedTypeVariables
   build-depends:
       aeson
     , base >=4.7 && <5
@@ -57,7 +57,7 @@ executable hauth-exe
       Paths_hauth
   hs-source-dirs:
       app
-  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell
+  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell ScopedTypeVariables
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -82,7 +82,7 @@ test-suite hauth-test
       Paths_hauth
   hs-source-dirs:
       test
-  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell
+  default-extensions: NoImplicitPrelude OverloadedStrings QuasiQuotes ConstraintKinds FlexibleContexts GeneralizedNewtypeDeriving TemplateHaskell ScopedTypeVariables
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

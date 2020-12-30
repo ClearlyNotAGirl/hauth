@@ -29,7 +29,7 @@ initialState =
 
 type InMemory r m = (Has (TVar State) r, MonadReader r m, MonadIO m)
 
-addAuth :: InMemory r m => D.Auth -> m (Either D.RegistrationError D.VerificationCode)
+addAuth :: InMemory r m => D.Auth -> m (Either D.RegistrationError (D.UserId, D.VerificationCode))
 addAuth auth = do
   tvar <- asks getter
   vCode <- liftIO $ stringRandomIO "[A-Za-z0-9]{16}"
@@ -51,27 +51,34 @@ addAuth auth = do
               stateUnverifiedEmails = newUnverified
             }
     lift $ writeTVar tvar newState
-    return vCode
+    -- return vCode
+    return (newUserId, vCode)
 
-setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError ())
+orThrow :: MonadError e m => Maybe a -> e -> m a
+orThrow Nothing e = throwError e
+orThrow (Just a) _ = return a
+
+setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError (D.UserId, D.Email))
 setEmailAsVerified vCode = do
   tvar <- asks getter
   atomically . runExceptT $ do
-    state <- lift $ readTVar tvar
+    state :: State <- lift $ readTVar tvar
     let unverifiedEmails = stateUnverifiedEmails state
-        verifiedEmails = stateVerifiedEmails state
         maybeEmail = lookup vCode unverifiedEmails
-    case maybeEmail of
-      Nothing -> throwError D.EmailVerificationErrorInvalidCode
-      Just email -> do
-        let newUnverified = deleteMap vCode unverifiedEmails
-            newVerified = insertSet email verifiedEmails
-            newState =
-              state
-                { stateUnverifiedEmails = newUnverified,
-                  stateVerifiedEmails = newVerified
-                }
-        lift $ writeTVar tvar newState
+    email :: D.Email <- maybeEmail `orThrow` D.EmailVerificationErrorInvalidCode
+    let auths = stateAuths state
+        maybeUserId = map fst . find ((email ==) . D.authEmail . snd) $ auths
+    uId <- maybeUserId `orThrow` D.EmailVerificationErrorInvalidCode
+    let verified = stateVerifiedEmails state
+        newVerified = insertSet email verified
+        newUnverified = deleteMap vCode unverifiedEmails
+        newState =
+          state
+            { stateUnverifiedEmails = newUnverified,
+              stateVerifiedEmails = newVerified
+            }
+    lift $ writeTVar tvar newState
+    return (uId, email)
 
 -- setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVerificationError ())
 -- setEmailAsVerified vCode = do

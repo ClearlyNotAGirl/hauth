@@ -8,10 +8,10 @@ import Katip
 
 -- Throwaway code
 
-instance AuthRepo IO where
-  addAuth (Auth email pass) = do
-    putStrLn $ "Adding auth: " <> rawEmail email
-    return $ Right "fake verification code"
+-- instance AuthRepo IO where
+--   addAuth (Auth email pass) = do
+--     putStrLn $ "Adding auth: " <> rawEmail email
+--     return $ Right "fake verification code"
 
 instance EmailVerificationNotifier IO where
   notifyEmailVerification email vcode =
@@ -20,12 +20,15 @@ instance EmailVerificationNotifier IO where
 type State = TVar M.State
 
 newtype App a = App
-  { unApp :: ReaderT State IO a
+  { unApp :: ReaderT State (KatipContextT IO) a
   }
-  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail)
+  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail, KatipContext, Katip)
 
-run :: State -> App a -> IO a
-run state = flip runReaderT state . unApp
+run :: LogEnv -> State -> App a -> IO a
+run le state =
+  runKatipContextT le () mempty
+    . flip runReaderT state
+    . unApp
 
 instance AuthRepo App where
   addAuth = M.addAuth
@@ -54,9 +57,12 @@ action = do
   print (session, uId, registeredEmail)
 
 someFunc :: IO ()
-someFunc = do
+-- someFunc = do
+--   state <- newTVarIO M.initialState
+--   run state action
+someFunc = withKatip $ \le -> do
   state <- newTVarIO M.initialState
-  run state action
+  run le state action
 
 runKatip :: IO ()
 runKatip = withKatip $ \le ->
