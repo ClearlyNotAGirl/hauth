@@ -1,6 +1,7 @@
 module Adapter.InMemory.Auth where
 
 import ClassyPrelude
+import Control.Monad.Except
 import Data.Has
 import qualified Domain.Auth as D
 import Text.StringRandom
@@ -33,11 +34,30 @@ type InMemory r m = (Has (TVar State) r, MonadReader r m, MonadIO m)
 addAuth :: InMemory r m => D.Auth -> m (Either D.RegistrationError D.VerificationCode)
 addAuth = undefined
 
--- setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailValidationErr ())
--- setEmailAsVerified = undefined
+setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError ())
+setEmailAsVerified vCode = do
+  tvar <- asks getter
+  atomically . runExceptT $ do
+    state <- lift $ readTVar tvar
+    let unverifiedEmails = stateUnverifiedEmails state
+        verifiedEmails = stateVerifiedEmails state
+        maybeEmail = lookup vCode unverifiedEmails
+    case maybeEmail of
+      Nothing -> throwError D.EmailVerificationErrorInvalidCode
+      Just email -> do
+        let newUnverified = deleteMap vCode unverifiedEmails
+            newVerified = insertSet email verifiedEmails
+            newState =
+              state
+                { stateUnverifiedEmails = newUnverified,
+                  stateVerifiedEmails = newVerified
+                }
+        lift $ writeTVar tvar newState
 
-setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVerificationError ())
-setEmailAsVerified = undefined
+-- setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVerificationError ())
+-- setEmailAsVerified vCode = do
+  
+
 
 findUserByAuth :: InMemory r m => D.Auth -> m (Maybe (D.UserId, Bool))
 findUserByAuth auth = do
