@@ -127,4 +127,4 @@ getNotificationsForEmail :: InMemory r m => D.Email -> m (Maybe D.VerificationCo
 getNotificationsForEmail email = do
   tvar <- asks getter
   state <- liftIO $ readTVarIO tvar
-  return $ lookup email $stateNotifications state
+  return $ lookup email $ stateNotifications state

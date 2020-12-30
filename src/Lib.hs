@@ -4,6 +4,7 @@ import qualified Adapter.InMemory.Auth as M
 import ClassyPrelude
 import qualified Control.Monad.Fail as Fail
 import Domain.Auth
+import Katip
 
 -- Throwaway code
 
@@ -56,3 +57,23 @@ someFunc :: IO ()
 someFunc = do
   state <- newTVarIO M.initialState
   run state action
+
+runKatip :: IO ()
+runKatip = withKatip $ \le ->
+  runKatipContextT le () mempty logSomething
+
+withKatip :: (LogEnv -> IO a) -> IO a
+withKatip app =
+  bracket createLogEnv closeScribes app
+  where
+    createLogEnv = do
+      logEnv <- initLogEnv "HAuth" "dev"
+      stdoutScribe <- mkHandleScribe ColorIfTerminal stdout (permitItem InfoS) V2
+      registerScribe "stdout" stdoutScribe defaultScribeSettings logEnv
+
+logSomething :: (KatipContext m) => m ()
+logSomething = do
+  $(logTM) InfoS "Log in no space"
+  katipAddNamespace "ns1" $
+    $(logTM) InfoS "Under ns1"
+  return ()
