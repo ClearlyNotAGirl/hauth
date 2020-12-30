@@ -63,6 +63,8 @@ data Auth = Auth
 
 type VerificationCode = Text
 
+data EmailVerificatioNRError = EmailVerificationErrorInvalidCode deriving (Show, Eq)
+
 class Monad m => AuthRepo m where
   addAuth :: Auth -> m (Either RegistrationError VerificationCode)
   setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
