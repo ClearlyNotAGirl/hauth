@@ -43,7 +43,11 @@ findUserByAuth :: InMemory r m => D.Auth -> m (Maybe (D.UserId, Bool))
 findUserByAuth = undefined
 
 findEmailFromUserId :: InMemory r m => D.UserId -> m (Maybe D.Email)
-findEmailFromUserId = undefined
+findEmailFromUserId uId = do
+  tvar <- asks getter
+  state <- liftIO $ readTVarIO tvar
+  let maybeAuth = map snd . find ((uId ==) . fst) $ stateAuths state
+  return $ D.authEmail <$> maybeAuth
 
 notifyEmailVerification :: InMemory r m => D.Email -> D.VerificationCode -> m ()
 notifyEmailVerification email vCode = do
