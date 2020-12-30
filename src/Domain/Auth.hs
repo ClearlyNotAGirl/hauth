@@ -89,14 +89,14 @@ data LoginError
 
 class Monad m => AuthRepo m where
   addAuth :: Auth -> m (Either RegistrationError VerificationCode)
-  setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
+  setEmailAsVerified :: VerificationCode -> m (Either EmailVerificationError ())
   findUserByAuth :: Auth -> m (Maybe (UserId, Bool))
   findEmailFromUserId :: UserId -> m (Maybe Email)
 
 getUser :: AuthRepo m => UserId -> m (Maybe Email)
 getUser = findEmailFromUserId
 
-verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailValidationErr ())
+verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailVerificationError ())
 verifyEmail = setEmailAsVerified
 
 login :: (AuthRepo m, SessionRepo m) => Auth -> m (Either LoginError SessionId)
