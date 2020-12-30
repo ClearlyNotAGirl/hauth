@@ -65,13 +65,6 @@ type VerificationCode = Text
 
 data EmailVerificatioNRError = EmailVerificationErrorInvalidCode deriving (Show, Eq)
 
-class Monad m => AuthRepo m where
-  addAuth :: Auth -> m (Either RegistrationError VerificationCode)
-  setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
-
-verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailValidationErr ())
-verifyEmail = setEmailAsVerified
-
 class Monad m => EmailVerificationNotifier m where
   notifyEmailVerification :: Email -> VerificationCode -> m ()
 
@@ -80,3 +73,41 @@ register auth = runExceptT $ do
   vCode <- ExceptT $ addAuth auth
   let email = authEmail auth
   lift $ notifyEmailVerification email vCode
+
+-- User related types
+
+newtype UserId = UserId Int
+
+type SessionId = Text
+
+data LoginError
+  = LoginErrorInvalidAuth
+  | LoginErrorEmailNotVerified
+  deriving (Show, Eq)
+
+-- Implementations
+
+class Monad m => AuthRepo m where
+  addAuth :: Auth -> m (Either RegistrationError VerificationCode)
+  setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
+  findUserByAuth :: Auth -> m (Maybe (UserId, Bool))
+
+verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailValidationErr ())
+verifyEmail = setEmailAsVerified
+
+login :: (AuthRepo m, SessionRepo m) => Auth -> m (Either LoginError SessionId)
+login auth = runExceptT $ do
+  result <- lift $ findUserByAuth auth
+  case result of
+    Nothing -> throwError LoginErrorInvalidAuth
+    Just (_, False) -> throwError LoginErrorEmailNotVerified
+    Just (uid, _) -> lift $ newSession uid   
+
+class Monad m => SessionRepo m where
+  newSession :: UserId -> m SessionId
+  findUserIdBySessionId :: SessionId -> m (Maybe UserId)
+
+resolveSessionId :: SessionRepo m => SessionId -> m (Maybe UserId)
+resolveSessionId = findUserIdBySessionId
+
+-- Misc
