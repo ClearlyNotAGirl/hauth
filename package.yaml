@@ -32,6 +32,10 @@ dependencies:
 - data-has
 - string-random
 - katip
+- postgresql-simple
+- postgresql-simple-migration
+- resource-pool
+- exceptions
 
 default-extensions:
 - NoImplicitPrelude

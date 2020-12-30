@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0380863282982edfa0a44fa4e95e9760941c15899260d9d9416dd8df6b51838d
+-- hash: a13e1bea2a972205898b7a91532e4104a4caf076ce78baeaa9451910f306a8f9
 
 name:           hauth
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Adapter.InMemory.Auth
+      Adapter.PostgreSQL.Auth
       Domain.Auth
       Domain.Validation
       Lib
@@ -41,9 +42,13 @@ library
     , base >=4.7 && <5
     , classy-prelude
     , data-has
+    , exceptions
     , katip
     , mtl
     , pcre-heavy
+    , postgresql-simple
+    , postgresql-simple-migration
+    , resource-pool
     , safe-exceptions
     , string-random
     , template-haskell
@@ -64,10 +69,14 @@ executable hauth-exe
     , base >=4.7 && <5
     , classy-prelude
     , data-has
+    , exceptions
     , hauth
     , katip
     , mtl
     , pcre-heavy
+    , postgresql-simple
+    , postgresql-simple-migration
+    , resource-pool
     , safe-exceptions
     , string-random
     , template-haskell
@@ -89,10 +98,14 @@ test-suite hauth-test
     , base >=4.7 && <5
     , classy-prelude
     , data-has
+    , exceptions
     , hauth
     , katip
     , mtl
     , pcre-heavy
+    , postgresql-simple
+    , postgresql-simple-migration
+    , resource-pool
     , safe-exceptions
     , string-random
     , template-haskell
