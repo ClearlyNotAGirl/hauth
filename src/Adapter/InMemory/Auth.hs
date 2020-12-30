@@ -29,10 +29,29 @@ initialState =
 
 type InMemory r m = (Has (TVar State) r, MonadReader r m, MonadIO m)
 
--- I'm gonna Google this one real quick, to see what where to put it.
--- Yeah it stays here.
 addAuth :: InMemory r m => D.Auth -> m (Either D.RegistrationError D.VerificationCode)
-addAuth = undefined
+addAuth auth = do
+  tvar <- asks getter
+  vCode <- liftIO $ stringRandomIO "[A-Za-z0-9]{16}"
+  atomically . runExceptT $ do
+    state <- lift $ readTVar tvar
+    let auths = stateAuths state
+        email = D.authEmail auth
+        isDuplicate = any (email ==) . map (D.authEmail . snd) $ auths
+    when isDuplicate $ throwError D.RegistrationErrorEmailTaken
+    -- actual update
+    let newUserId = stateUserIdCounter state + 1
+        newAuths = (newUserId, auth) : auths
+        unverifieds = stateUnverifiedEmails state
+        newUnverified = insertMap vCode email unverifieds
+        newState =
+          state
+            { stateAuths = newAuths,
+              stateUserIdCounter = newUserId,
+              stateUnverifiedEmails = newUnverified
+            }
+    lift $ writeTVar tvar newState
+    return vCode
 
 setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError ())
 setEmailAsVerified vCode = do
@@ -56,8 +75,6 @@ setEmailAsVerified vCode = do
 
 -- setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVerificationError ())
 -- setEmailAsVerified vCode = do
-  
-
 
 findUserByAuth :: InMemory r m => D.Auth -> m (Maybe (D.UserId, Bool))
 findUserByAuth auth = do

@@ -76,7 +76,7 @@ register auth = runExceptT $ do
 
 -- User related types
 
-newtype UserId = UserId Int deriving (Show, Eq)
+type UserId = Int -- deriving (Show, Eq)
 
 type SessionId = Text
 
