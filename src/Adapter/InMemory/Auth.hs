@@ -53,7 +53,7 @@ notifyEmailVerification email vCode = do
     let notifications = stateNotifications state
         newNotifications = insertMap email vCode notifications
         newState = state {stateNotifications = newNotifications}
-    writeTVartvar newState
+    writeTVar tvar newState
 
 newSession :: InMemory r m => D.UserId -> m D.SessionId
 newSession uId = do
@@ -71,3 +71,9 @@ findUserIdBySessionId :: InMemory r m => D.SessionId -> m (Maybe D.UserId)
 findUserIdBySessionId sId = do
   tvar <- asks getter
   liftIO $ lookup sId . stateSessions <$> readTVarIO tvar
+
+getNotificationsForEmail :: InMemory r m => D.Email -> m (Maybe D.VerificationCode)
+getNotificationsForEmail email = do
+  tvar <- asks getter
+  state <- liftIO $ readTVarIO tvar
+  return $ lookup email $stateNotifications state
