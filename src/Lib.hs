@@ -1,7 +1,9 @@
 module Lib where
 
 import qualified Adapter.InMemory.Auth as M
+import qualified Adapter.PostgreSQL.Auth as PG
 import ClassyPrelude
+import Control.Monad.Catch (MonadThrow)
 import qualified Control.Monad.Fail as Fail
 import Domain.Auth
 import Katip
@@ -17,12 +19,12 @@ instance EmailVerificationNotifier IO where
   notifyEmailVerification email vcode =
     putStrLn $ "Notify " <> rawEmail email <> " - " <> vcode
 
-type State = TVar M.State
+type State = (PG.State, TVar M.State)
 
 newtype App a = App
   { unApp :: ReaderT State (KatipContextT IO) a
   }
-  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail, KatipContext, Katip)
+  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail, KatipContext, Katip, MonadThrow)
 
 run :: LogEnv -> State -> App a -> IO a
 run le state =
@@ -31,10 +33,10 @@ run le state =
     . unApp
 
 instance AuthRepo App where
-  addAuth = M.addAuth
-  setEmailAsVerified = M.setEmailAsVerified
-  findUserByAuth = M.findUserByAuth
-  findEmailFromUserId = M.findEmailFromUserId
+  addAuth = PG.addAuth
+  setEmailAsVerified = PG.setEmailAsVerified
+  findUserByAuth = PG.findUserByAuth
+  findEmailFromUserId = PG.findEmailFromUserId
 
 instance EmailVerificationNotifier App where
   notifyEmailVerification = M.notifyEmailVerification
@@ -60,9 +62,22 @@ someFunc :: IO ()
 -- someFunc = do
 --   state <- newTVarIO M.initialState
 --   run state action
+-- someFunc = withKatip $ \le -> do
+--   state <- newTVarIO M.initialState
+--   run le state action
+
 someFunc = withKatip $ \le -> do
-  state <- newTVarIO M.initialState
-  run le state action
+  mState <- newTVarIO M.initialState
+  PG.withState pgCfg $ \pgState ->
+    run le (pgState, mState) action
+  where
+    pgCfg =
+      PG.Config
+        { PG.configUrl = "",
+          PG.configStripeCount = 2,
+          PG.configMaxOpenConnPerStripe = 5,
+          PG.configIdleConnTimeout = 10
+        }
 
 runKatip :: IO ()
 runKatip = withKatip $ \le ->
