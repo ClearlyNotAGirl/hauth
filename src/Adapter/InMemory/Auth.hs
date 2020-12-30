@@ -40,7 +40,17 @@ setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVeri
 setEmailAsVerified = undefined
 
 findUserByAuth :: InMemory r m => D.Auth -> m (Maybe (D.UserId, Bool))
-findUserByAuth = undefined
+findUserByAuth auth = do
+  tvar <- asks getter
+  state <- liftIO $ readTVarIO tvar
+  let maybeUserId = map fst . find ((auth ==) . snd) $ stateAuths state
+  case maybeUserId of
+    Nothing -> return Nothing
+    Just uId -> do
+      let verifiedEmails = stateVerifiedEmails state
+          email = D.authEmail auth
+          isVerified = elem email verifiedEmails
+      return $ Just (uId, isVerified)
 
 findEmailFromUserId :: InMemory r m => D.UserId -> m (Maybe D.Email)
 findEmailFromUserId uId = do
