@@ -65,6 +65,10 @@ type VerificationCode = Text
 
 class Monad m => AuthRepo m where
   addAuth :: Auth -> m (Either RegistrationError VerificationCode)
+  setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
+
+verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailValidationErr ())
+verifyEmail = setEmailAsVerified
 
 class Monad m => EmailVerificationNotifier m where
   notifyEmailVerification :: Email -> VerificationCode -> m ()
