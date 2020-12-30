@@ -91,6 +91,10 @@ class Monad m => AuthRepo m where
   addAuth :: Auth -> m (Either RegistrationError VerificationCode)
   setEmailAsVerified :: VerificationCode -> m (Either EmailValidationErr ())
   findUserByAuth :: Auth -> m (Maybe (UserId, Bool))
+  findEmailFromUserId :: UserId -> m (Maybe Email)
+
+getUser :: AuthRepo m => UserId -> m (Maybe Email)
+getUser = findEmailFromUserId
 
 verifyEmail :: AuthRepo m => VerificationCode -> m (Either EmailValidationErr ())
 verifyEmail = setEmailAsVerified
@@ -101,7 +105,7 @@ login auth = runExceptT $ do
   case result of
     Nothing -> throwError LoginErrorInvalidAuth
     Just (_, False) -> throwError LoginErrorEmailNotVerified
-    Just (uid, _) -> lift $ newSession uid   
+    Just (uid, _) -> lift $ newSession uid
 
 class Monad m => SessionRepo m where
   newSession :: UserId -> m SessionId
