@@ -29,11 +29,15 @@ dependencies:
 - safe-exceptions
 - template-haskell
 - mtl
+- data-has
+- string-random
 
 default-extensions:
 - NoImplicitPrelude
 - OverloadedStrings
 - QuasiQuotes
+- ConstraintKinds
+- FlexibleContexts
 
 library:
   source-dirs: src

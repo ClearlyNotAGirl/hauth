@@ -11,7 +11,7 @@ data RegistrationError
 
 -- Email-related types
 
-newtype Email = Email {emailRaw :: Text} deriving (Show, Eq)
+newtype Email = Email {emailRaw :: Text} deriving (Show, Eq, Ord)
 
 rawEmail :: Email -> Text
 rawEmail = emailRaw
@@ -63,7 +63,7 @@ data Auth = Auth
 
 type VerificationCode = Text
 
-data EmailVerificatioNRError = EmailVerificationErrorInvalidCode deriving (Show, Eq)
+data EmailVerificationError = EmailVerificationErrorInvalidCode deriving (Show, Eq)
 
 class Monad m => EmailVerificationNotifier m where
   notifyEmailVerification :: Email -> VerificationCode -> m ()
@@ -76,7 +76,7 @@ register auth = runExceptT $ do
 
 -- User related types
 
-newtype UserId = UserId Int
+newtype UserId = UserId Int deriving (Show, Eq)
 
 type SessionId = Text
 

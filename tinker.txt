@@ -1,1 +1,9 @@
--- tinker.txt
+tvar <- newTVarIO 0
+
+let add1 = readTVar tvar >>= \val -> writeTVar tvar (val + 1)
+let add1Actions = replicate 100 add1 :: [STM ()]
+
+-- I wonder what this would do (mapConcurrently, checkhing out)
+mapConcurrently atomically add1Actions
+
+readTVarIO tvar
