@@ -23,6 +23,14 @@ routes = do
     let sum = p1 + p2 :: Int
     text $ concat ["Finishing adding. Result is ", fromStrict $ tshow sum]
 
+  get "/error" $
+    rescue
+      ( do
+          raise "Yolo"
+          text "More and more"
+      )
+      (\e -> text $ "alright, error was: " <> e)
+
   matchAny "/admin" $ text "I don't care about your HTTP verb"
   options (regex ".*") $ text "CORS usually use this"
 
