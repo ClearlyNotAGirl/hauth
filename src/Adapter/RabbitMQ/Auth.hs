@@ -43,3 +43,8 @@ consumerEmailVerification runner msg =
           let vCode = emailVerificationPayloadVerificationCode payload
           M.notifyEmailVerification email vCode
           return True
+
+init :: (M.InMemory r m, KatipContext m, MonadCatch m) => State -> (m Bool -> IO Bool) -> IO ()
+init state runner = do
+  initQueue state "verifyEmail" "auth" "userRegistered"
+  initConsumer state "verifyEmail" (consumerEmailVerification runner)

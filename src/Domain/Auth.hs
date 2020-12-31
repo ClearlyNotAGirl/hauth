@@ -129,4 +129,3 @@ class Monad m => SessionRepo m where
 resolveSessionId :: SessionRepo m => SessionId -> m (Maybe UserId)
 resolveSessionId = findUserIdBySessionId
 
--- Misc

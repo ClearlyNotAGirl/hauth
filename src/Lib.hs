@@ -2,8 +2,11 @@ module Lib where
 
 import qualified Adapter.InMemory.Auth as M
 import qualified Adapter.PostgreSQL.Auth as PG
+import qualified Adapter.RabbitMQ.Auth as MQAuth
+import qualified Adapter.RabbitMQ.Common as MQ
 import qualified Adapter.Redis.Auth as Redis
 import ClassyPrelude
+import Control.Exception.Safe (MonadCatch)
 import Control.Monad.Catch (MonadThrow)
 import qualified Control.Monad.Fail as Fail
 import Domain.Auth
@@ -20,12 +23,12 @@ instance EmailVerificationNotifier IO where
   notifyEmailVerification email vcode =
     putStrLn $ "Notify " <> rawEmail email <> " - " <> vcode
 
-type State = (PG.State, Redis.State, TVar M.State)
+type State = (PG.State, Redis.State, MQ.State, TVar M.State)
 
 newtype App a = App
   { unApp :: ReaderT State (KatipContextT IO) a
   }
-  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail, KatipContext, Katip, MonadThrow)
+  deriving (Applicative, Functor, Monad, MonadReader State, MonadIO, Fail.MonadFail, KatipContext, Katip, MonadThrow, MonadCatch)
 
 run :: LogEnv -> State -> App a -> IO a
 run le state =
@@ -40,7 +43,7 @@ instance AuthRepo App where
   findEmailFromUserId = PG.findEmailFromUserId
 
 instance EmailVerificationNotifier App where
-  notifyEmailVerification = M.notifyEmailVerification
+  notifyEmailVerification = MQAuth.notifyEmailVerification
 
 instance SessionRepo App where
   newSession = Redis.newSession
@@ -52,12 +55,18 @@ action = do
       passwd = either undefined id $ mkPassword "helloWorld123123"
       auth = Auth email passwd
   register auth
-  Just vCode <- M.getNotificationsForEmail email
+  vCode <- pollNotif email
   verifyEmail vCode
   Right session <- login auth
   Just uId <- resolveSessionId session
   Just registeredEmail <- getUser uId
   print (session, uId, registeredEmail)
+  where
+    pollNotif email = do
+      result <- M.getNotificationsForEmail email
+      case result of
+        Nothing -> pollNotif email
+        Just vCode -> return vCode
 
 someFunc :: IO ()
 -- someFunc = do
@@ -67,12 +76,17 @@ someFunc :: IO ()
 --   state <- newTVarIO M.initialState
 --   run le state action
 
-someFunc = withKatip $ \le -> do
-  mState <- newTVarIO M.initialState
-  PG.withState pgCfg $ \pgState ->
-    Redis.withState redisCfg $ \redisState ->
-      run le (pgState, redisState, mState) action
+withState :: (LogEnv -> State -> IO ()) -> IO ()
+withState action =
+  withKatip $ \le -> do
+    mState <- newTVarIO M.initialState
+    PG.withState pgCfg $ \pgState ->
+      Redis.withState redisCfg $ \redisState ->
+        MQ.withState mqCfg 16 $ \mqState -> do
+          let state = (pgState, redisState, mqState, mState)
+          action le state
   where
+    mqCfg = "amqp://guest:guest@localhost:5672/%2F"
     redisCfg = "redis://localhost:6379/0"
     pgCfg =
       PG.Config
@@ -81,6 +95,10 @@ someFunc = withKatip $ \le -> do
           PG.configMaxOpenConnPerStripe = 5,
           PG.configIdleConnTimeout = 10
         }
+someFunc = withState $ \le state@(_, _, mqState, _) -> do
+  let runner = run le state
+  MQAuth.init mqState runner
+  runner action
 
 runKatip :: IO ()
 runKatip = withKatip $ \le ->
