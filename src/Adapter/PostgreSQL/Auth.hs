@@ -12,7 +12,9 @@ import Text.StringRandom
 
 type State = Pool Connection
 
-migrate :: State -> IO ()
+type DbAction a = State -> IO a
+
+migrate :: DbAction ()
 migrate pool = withResource pool $ \conn -> do
   result <- withTransaction conn (runMigrations False conn cmds)
   case result of
@@ -31,9 +33,9 @@ data Config = Config
     configIdleConnTimeout :: NominalDiffTime
   }
 
-withPool :: Config -> (State -> IO a) -> IO a
-withPool cfg action =
-  bracket initPool cleanPool action
+withPool :: Config -> DbAction a -> IO a
+withPool cfg =
+  bracket initPool cleanPool
   where
     initPool =
       createPool
@@ -46,7 +48,7 @@ withPool cfg action =
     openConn = connectPostgreSQL (configUrl cfg)
     closeConn = close
 
-withState :: Config -> (State -> IO a) -> IO a
+withState :: Config -> DbAction a -> IO a
 withState cfg action =
   withPool cfg $ \state -> do
     migrate state
@@ -65,7 +67,7 @@ addAuth (D.Auth email pass) = do
       rawPass = D.rawPassword pass
   vCode <- liftIO $ do
     r <- stringRandomIO "[A-Za-z0-9]{16}"
-    return $ (tshow rawEmail) <> "_" <> r
+    return $ tshow rawEmail <> "_" <> r
   result <- withConn $ \conn ->
     try $ query conn qry (rawEmail, rawPass, vCode)
   case result of
