@@ -33,6 +33,7 @@ dependencies:
 - string-random
 - katip
 - postgresql-simple
+- hedis
 - postgresql-simple-migration
 - resource-pool
 - exceptions

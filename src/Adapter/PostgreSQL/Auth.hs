@@ -81,7 +81,7 @@ addAuth (D.Auth email pass) = do
     qry =
       "insert into auths \
       \(email,pass,email_verification_code,is_email_verified) \
-      \values (?, crypt(?, gen_salt('bf')), ?, 'f') return id"
+      \values (?, crypt(?, gen_salt('bf')), ?, 'f') returning id"
 
 setEmailAsVerified :: PG r m => D.VerificationCode -> m (Either D.EmailVerificationError (D.UserId, D.Email))
 setEmailAsVerified vCode = do

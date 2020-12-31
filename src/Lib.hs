@@ -73,7 +73,7 @@ someFunc = withKatip $ \le -> do
   where
     pgCfg =
       PG.Config
-        { PG.configUrl = "",
+        { PG.configUrl = "postgresql://postgres:postgres@localhost/hauth",
           PG.configStripeCount = 2,
           PG.configMaxOpenConnPerStripe = 5,
           PG.configIdleConnTimeout = 10
@@ -84,8 +84,8 @@ runKatip = withKatip $ \le ->
   runKatipContextT le () mempty logSomething
 
 withKatip :: (LogEnv -> IO a) -> IO a
-withKatip app =
-  bracket createLogEnv closeScribes app
+withKatip =
+  bracket createLogEnv closeScribes
   where
     createLogEnv = do
       logEnv <- initLogEnv "HAuth" "dev"

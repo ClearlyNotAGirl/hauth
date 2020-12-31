@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a13e1bea2a972205898b7a91532e4104a4caf076ce78baeaa9451910f306a8f9
+-- hash: b340d25aab46bbb07badad25a81262a8ca05736925ebaec7e824d33579f1d72e
 
 name:           hauth
 version:        0.1.0.0
@@ -43,6 +43,7 @@ library
     , classy-prelude
     , data-has
     , exceptions
+    , hedis
     , katip
     , mtl
     , pcre-heavy
@@ -71,6 +72,7 @@ executable hauth-exe
     , data-has
     , exceptions
     , hauth
+    , hedis
     , katip
     , mtl
     , pcre-heavy
@@ -100,6 +102,7 @@ test-suite hauth-test
     , data-has
     , exceptions
     , hauth
+    , hedis
     , katip
     , mtl
     , pcre-heavy
