@@ -37,6 +37,7 @@ dependencies:
 - postgresql-simple-migration
 - resource-pool
 - exceptions
+- amqp
 
 default-extensions:
 - NoImplicitPrelude
