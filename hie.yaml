@@ -1,0 +1,13 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:hauth"
+
+    - path: "app/Main.hs"
+      component: "hauth:exe:hauth-exe"
+
+    - path: "app/Paths_hauth.hs"
+      component: "hauth:exe:hauth-exe"
+
+    - path: "test"
+      component: "hauth:test:hauth-test"

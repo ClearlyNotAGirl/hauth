@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4a75cf633884c46d474e7dcfb26ef782f9253a1311284c38d0ddcf3a94b62eb1
+-- hash: 502f6c1b88097c5ae67d75faf9aab7d1e5bac7b492c1242f7b72430888435ebf
 
 name:           hauth
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Adapter.HTTP.Main
       Adapter.InMemory.Auth
       Adapter.PostgreSQL.Auth
       Adapter.RabbitMQ.Auth
@@ -55,6 +56,7 @@ library
     , postgresql-simple-migration
     , resource-pool
     , safe-exceptions
+    , scotty
     , string-random
     , template-haskell
     , time
@@ -85,6 +87,7 @@ executable hauth-exe
     , postgresql-simple-migration
     , resource-pool
     , safe-exceptions
+    , scotty
     , string-random
     , template-haskell
     , time
@@ -116,6 +119,7 @@ test-suite hauth-test
     , postgresql-simple-migration
     , resource-pool
     , safe-exceptions
+    , scotty
     , string-random
     , template-haskell
     , time

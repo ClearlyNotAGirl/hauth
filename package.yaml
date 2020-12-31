@@ -38,6 +38,7 @@ dependencies:
 - resource-pool
 - exceptions
 - amqp
+- scotty
 
 default-extensions:
 - NoImplicitPrelude
