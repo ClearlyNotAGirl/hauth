@@ -61,9 +61,9 @@ publish exchange routingKey payload = do
   let msg = newMsg {msgBody = encode payload}
   liftIO . void $ publishMsg chan exchange routingKey msg
 
-withMsgAndErr :: (KatipContext m, ToJSON e) => Message -> e -> m a -> m a
+withMsgAndErr :: (KatipContext m, Show e) => Message -> e -> m a -> m a
 withMsgAndErr msg err =
-  katipAddContext (sl "mqMsg" (show msg) <> sl "error" err)
+  katipAddContext (sl "mqMsg" (show msg) <> sl "error" (show err))
 
 consumeAndProcess :: (KatipContext m, FromJSON a, MonadCatch m) => Message -> (a -> m Bool) -> m Bool
 consumeAndProcess msg handler =
