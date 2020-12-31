@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b340d25aab46bbb07badad25a81262a8ca05736925ebaec7e824d33579f1d72e
+-- hash: 88e48ba80ffb1cc09faadb74358a44d576009bca4a0c8f543ff642f3f25b1625
 
 name:           hauth
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Adapter.InMemory.Auth
       Adapter.PostgreSQL.Auth
+      Adapter.Redis.Auth
       Domain.Auth
       Domain.Validation
       Lib

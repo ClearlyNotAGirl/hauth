@@ -2,6 +2,7 @@ module Lib where
 
 import qualified Adapter.InMemory.Auth as M
 import qualified Adapter.PostgreSQL.Auth as PG
+import qualified Adapter.Redis.Auth as Redis
 import ClassyPrelude
 import Control.Monad.Catch (MonadThrow)
 import qualified Control.Monad.Fail as Fail
@@ -19,7 +20,7 @@ instance EmailVerificationNotifier IO where
   notifyEmailVerification email vcode =
     putStrLn $ "Notify " <> rawEmail email <> " - " <> vcode
 
-type State = (PG.State, TVar M.State)
+type State = (PG.State, Redis.State, TVar M.State)
 
 newtype App a = App
   { unApp :: ReaderT State (KatipContextT IO) a
@@ -42,8 +43,8 @@ instance EmailVerificationNotifier App where
   notifyEmailVerification = M.notifyEmailVerification
 
 instance SessionRepo App where
-  newSession = M.newSession
-  findUserIdBySessionId = M.findUserIdBySessionId
+  newSession = Redis.newSession
+  findUserIdBySessionId = Redis.findUserIdBySessionId
 
 action :: App ()
 action = do
@@ -69,8 +70,10 @@ someFunc :: IO ()
 someFunc = withKatip $ \le -> do
   mState <- newTVarIO M.initialState
   PG.withState pgCfg $ \pgState ->
-    run le (pgState, mState) action
+    Redis.withState redisCfg $ \redisState ->
+      run le (pgState, redisState, mState) action
   where
+    redisCfg = "redis://localhost:6379/0"
     pgCfg =
       PG.Config
         { PG.configUrl = "postgresql://postgres:postgres@localhost/hauth",
