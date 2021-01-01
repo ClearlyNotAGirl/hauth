@@ -39,12 +39,25 @@ run le state =
     . flip runReaderT state
     . unApp
 
+instance D.AuthRepo App where
+  addAuth = PG.addAuth
+  setEmailAsVerified = PG.setEmailAsVerified
+  findUserByAuth = PG.findUserByAuth
+  findEmailFromUserId = PG.findEmailFromUserId
+
+instance D.EmailVerificationNotifier App where
+  notifyEmailVerification = MQAuth.notifyEmailVerification
+
+instance D.SessionRepo App where
+  newSession = Redis.newSession
+  findUserIdBySessionId = Redis.findUserIdBySessionId
+
 instance AuthService App where
   register = D.register
-  verifyEmail = undefined -- D.verifyEmail
-  login = undefined -- D.login
-  resolveSessionId = undefined -- D.resolveSessionId
-  getUser = undefined -- D.getUser
+  verifyEmail = D.verifyEmail
+  login = D.login
+  resolveSessionId = D.resolveSessionId
+  getUser = D.getUser
 
 instance MQAuth.EmailVerificationSender App where
   sendEmailVerification = M.notifyEmailVerification

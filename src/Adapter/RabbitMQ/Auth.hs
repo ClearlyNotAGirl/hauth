@@ -33,7 +33,7 @@ notifyEmailVerification email vCode =
   let payload = EmailVerificationPayload (D.rawEmail email) vCode
    in publish "auth" "userRegistered" payload
 
-consumerEmailVerification :: (M.InMemory r m, KatipContext m, MonadCatch m) => (m Bool -> IO Bool) -> Message -> IO Bool
+consumerEmailVerification :: (EmailVerificationSender m, KatipContext m, MonadCatch m) => (m Bool -> IO Bool) -> Message -> IO Bool
 consumerEmailVerification runner msg =
   runner $ consumeAndProcess msg handler
   where
@@ -44,10 +44,10 @@ consumerEmailVerification runner msg =
           return False
         Right email -> do
           let vCode = emailVerificationPayloadVerificationCode payload
-          M.notifyEmailVerification email vCode
+          sendEmailVerification email vCode
           return True
 
-init :: (M.InMemory r m, KatipContext m, MonadCatch m) => State -> (m Bool -> IO Bool) -> IO ()
+init :: (EmailVerificationSender m, KatipContext m, MonadCatch m) => State -> (m Bool -> IO Bool) -> IO ()
 init state runner = do
   initQueue state "verifyEmail" "auth" "userRegistered"
   initConsumer state "verifyEmail" (consumerEmailVerification runner)
