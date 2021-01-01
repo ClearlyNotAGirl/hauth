@@ -42,10 +42,14 @@ dependencies:
 - http-types
 - digestive-functors
 - digestive-functors-aeson
+- digestive-functors-blaze
+- digestive-functors-scotty
 - blaze-builder
 - cookie
 - wai
 - wai-extra
+- blaze-html
+- warp
 
 default-extensions:
 - NoImplicitPrelude

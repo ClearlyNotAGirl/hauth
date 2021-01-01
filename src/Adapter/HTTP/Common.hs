@@ -11,18 +11,9 @@ import qualified Text.Digestive.Form as DF
 import qualified Text.Digestive.Types as DF
 import Web.Cookie
 import Web.Scotty.Trans
+import Katip
 
-parseAndValidateJSON :: (ScottyError e, MonadIO m, ToJSON v) => DF.Form v m a -> ActionT e m a
-parseAndValidateJSON form = do
-  val <- jsonData `rescue` (\_ -> return Null)
-  validationResult <- lift $ DF.digestJSON form val
-  case validationResult of
-    (v, Nothing) -> do
-      status status400
-      json $ DF.jsonErrors v
-      finish
-    (_, Just result) ->
-      return result
+type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
 
 toResult :: Either e a -> DF.Result e a
 toResult = either DF.Error DF.Success
@@ -61,12 +52,5 @@ getCurrentUserId = do
     Nothing -> return Nothing
     Just sId -> lift $ resolveSessionId sId
 
-reqCurrentUserId :: (SessionRepo m, ScottyError e) => ActionT e m UserId
-reqCurrentUserId = do
-  mayUserId <- getCurrentUserId
-  case mayUserId of
-    Nothing -> do
-      status status401
-      json ("AuthRequired" :: Text)
-      finish
-    Just uId -> return uId
+errorResponse :: (ToJSON a) => a -> Value
+errorResponse val = object ["error" .= val]

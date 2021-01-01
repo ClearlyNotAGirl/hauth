@@ -1,25 +1,22 @@
 module Adapter.HTTP.Main where
 
-import Domain.Auth
 import ClassyPrelude
-import Web.Scotty.Trans
-import Network.HTTP.Types.Status
-import qualified Adapter.HTTP.API.Auth as AuthAPI
-import Adapter.HTTP.Common
-import Katip
 import Network.Wai
-import Network.Wai.Middleware.Gzip
+import Web.Scotty
+import Domain.Auth
+import Adapter.HTTP.Common
+import Network.Wai.Handler.Warp
+import Network.Wai.Middleware.Vhost
+import qualified Adapter.HTTP.API.Main as API
+import qualified Adapter.HTTP.Web.Main as Web
+import Web.Scotty.Trans
 
-type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
+-- type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
 
-main :: WebContext m  => Int -> (m Response -> IO Response) -> IO ()
-main port runner = scottyT port runner routes
-
-routes :: WebContext m  => ScottyT LText m ()
-routes = do
-  middleware $ gzip $ def {gzipFiles = GzipCompress}
-  AuthAPI.routes
-  defaultHandler $ \e -> do
-    lift $ $(logTM) ErrorS $ "Unhandled error: " <> ls (showError e)
-    status status500
-    json ("InternalServerError"::Text)
+main :: WebContext m => Int -> (m Response -> IO Response) -> IO ()
+main port runner = do
+    web <- Web.main runner
+    api <- API.main runner
+    run port $ vhost [(pathBeginsWith "api",api)] web
+    where
+        pathBeginsWith path req = headMay (pathInfo req) == Just path

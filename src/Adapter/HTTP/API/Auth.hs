@@ -6,6 +6,7 @@ import Data.Aeson hiding (json, (.:))
 import Domain.Auth
 import Katip
 import Network.HTTP.Types.Status
+import Adapter.HTTP.API.Common
 import Text.Digestive.Form ((.:))
 import qualified Text.Digestive.Form as DF
 import Web.Scotty.Trans
