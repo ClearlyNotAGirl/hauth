@@ -1,5 +1,7 @@
 module Lib where
 
+import Domain.Auth.Types
+import qualified Domain.Auth.Service as D
 import qualified Adapter.InMemory.Auth as M
 import qualified Adapter.PostgreSQL.Auth as PG
 import qualified Adapter.RabbitMQ.Auth as MQAuth
@@ -10,7 +12,7 @@ import ClassyPrelude
 import Control.Exception.Safe (MonadCatch)
 import Control.Monad.Catch (MonadThrow)
 import qualified Control.Monad.Fail as Fail
-import Domain.Auth
+--import Domain.Auth
 import Katip
 
 -- Throwaway code
@@ -20,9 +22,9 @@ import Katip
 --     putStrLn $ "Adding auth: " <> rawEmail email
 --     return $ Right "fake verification code"
 
-instance EmailVerificationNotifier IO where
-  notifyEmailVerification email vcode =
-    putStrLn $ "Notify " <> rawEmail email <> " - " <> vcode
+-- instance EmailVerificationNotifier IO where
+--   notifyEmailVerification email vcode =
+--     putStrLn $ "Notify " <> rawEmail email <> " - " <> vcode
 
 type State = (PG.State, Redis.State, MQ.State, TVar M.State)
 
@@ -37,18 +39,28 @@ run le state =
     . flip runReaderT state
     . unApp
 
-instance AuthRepo App where
-  addAuth = PG.addAuth
-  setEmailAsVerified = PG.setEmailAsVerified
-  findUserByAuth = PG.findUserByAuth
-  findEmailFromUserId = PG.findEmailFromUserId
+instance AuthService App where
+  register = D.register
+  verifyEmail = undefined -- D.verifyEmail
+  login = undefined -- D.login
+  resolveSessionId = undefined -- D.resolveSessionId
+  getUser = undefined -- D.getUser
 
-instance EmailVerificationNotifier App where
-  notifyEmailVerification = MQAuth.notifyEmailVerification
+instance MQAuth.EmailVerificationSender App where
+  sendEmailVerification = M.notifyEmailVerification
 
-instance SessionRepo App where
-  newSession = Redis.newSession
-  findUserIdBySessionId = Redis.findUserIdBySessionId
+-- instance AuthRepo App where
+--   addAuth = PG.addAuth
+--   setEmailAsVerified = PG.setEmailAsVerified
+--   findUserByAuth = PG.findUserByAuth
+--   findEmailFromUserId = PG.findEmailFromUserId
+
+-- instance EmailVerificationNotifier App where
+--   notifyEmailVerification = MQAuth.notifyEmailVerification
+
+-- instance SessionRepo App where
+--   newSession = Redis.newSession
+--   findUserIdBySessionId = Redis.findUserIdBySessionId
 
 action :: App ()
 action = do

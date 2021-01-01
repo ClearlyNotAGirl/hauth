@@ -3,7 +3,7 @@ module Adapter.InMemory.Auth where
 import ClassyPrelude
 import Control.Monad.Except
 import Data.Has
-import qualified Domain.Auth as D
+import qualified Domain.Auth.Types as D
 import Text.StringRandom
 
 data State = State

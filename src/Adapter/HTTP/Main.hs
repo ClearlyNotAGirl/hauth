@@ -3,7 +3,7 @@ module Adapter.HTTP.Main where
 import ClassyPrelude
 import Network.Wai
 import Web.Scotty
-import Domain.Auth
+import Domain.Auth.Types
 import Adapter.HTTP.Common
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.Vhost

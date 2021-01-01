@@ -6,7 +6,7 @@ import ClassyPrelude
 import Control.Exception.Safe
 import Data.Aeson
 import Data.Aeson.TH
-import qualified Domain.Auth as D
+import qualified Domain.Auth.Types as D
 import Katip
 import Network.AMQP
 
@@ -14,6 +14,9 @@ data EmailVerificationPayload = EmailVerificationPayload
   { emailVerificationPayloadEmail :: Text,
     emailVerificationPayloadVerificationCode :: Text
   }
+
+class Monad m => EmailVerificationSender m where
+  sendEmailVerification :: D.Email -> D.VerificationCode -> m ()
 
 $( let structName = fromMaybe "" . lastMay . splitElem '.' . show $ ''EmailVerificationPayload
        lowercaseFirst (x : xs) = toLower [x] <> xs

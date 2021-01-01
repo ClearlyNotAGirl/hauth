@@ -3,7 +3,7 @@ module Adapter.HTTP.API.Auth where
 import Adapter.HTTP.Common
 import ClassyPrelude
 import Data.Aeson hiding (json, (.:))
-import Domain.Auth
+import Domain.Auth.Types
 import Katip
 import Network.HTTP.Types.Status
 import Adapter.HTTP.API.Common
@@ -22,7 +22,7 @@ verifyEmailForm :: (Monad m) => DF.Form [Text] m VerificationCode
 verifyEmailForm = DF.text Nothing
 
 routes ::
-  (ScottyError e, MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m) =>
+  (ScottyError e, MonadIO m, KatipContext m, AuthService m) =>
   ScottyT e m ()
 routes = do
   post "/api/auth/register" $ do

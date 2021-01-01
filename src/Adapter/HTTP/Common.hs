@@ -4,7 +4,7 @@ import Blaze.ByteString.Builder (toLazyByteString)
 import ClassyPrelude
 import Data.Aeson hiding (json)
 import Data.Time.Lens
-import Domain.Auth
+import Domain.Auth.Types
 import Network.HTTP.Types.Status
 import qualified Text.Digestive.Aeson as DF
 import qualified Text.Digestive.Form as DF
@@ -13,7 +13,7 @@ import Web.Cookie
 import Web.Scotty.Trans
 import Katip
 
-type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
+type WebContext m = (MonadIO m, KatipContext m, AuthService m)
 
 toResult :: Either e a -> DF.Result e a
 toResult = either DF.Error DF.Success
@@ -45,7 +45,7 @@ setSessionIdInCookie sId = do
         setCookieSameSite = Just sameSiteLax
       }
 
-getCurrentUserId :: (SessionRepo m, ScottyError e) => ActionT e m (Maybe UserId)
+getCurrentUserId :: (AuthService m, ScottyError e) => ActionT e m (Maybe UserId)
 getCurrentUserId = do
   maySessionId <- getCookie "sId"
   case maySessionId of

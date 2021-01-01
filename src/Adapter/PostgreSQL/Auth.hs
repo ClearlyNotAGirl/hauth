@@ -7,7 +7,7 @@ import Data.Pool
 import Data.Time
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.Migration
-import qualified Domain.Auth as D
+import qualified Domain.Auth.Types as D
 import Text.StringRandom
 
 type State = Pool Connection

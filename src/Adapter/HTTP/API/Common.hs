@@ -1,7 +1,7 @@
 module Adapter.HTTP.API.Common where
 
 import ClassyPrelude
-import Domain.Auth
+import Domain.Auth.Types
 import Web.Scotty.Trans
 import qualified Text.Digestive.Aeson as DF
 import qualified Text.Digestive.Form as DF
@@ -22,7 +22,7 @@ parseAndValidateJSON form = do
     (_, Just result) ->
       return result
 
-reqCurrentUserId :: (SessionRepo m, ScottyError e) => ActionT e m UserId
+reqCurrentUserId :: (AuthService m, ScottyError e) => ActionT e m UserId
 reqCurrentUserId = do
   mayUserId <- getCurrentUserId
   case mayUserId of

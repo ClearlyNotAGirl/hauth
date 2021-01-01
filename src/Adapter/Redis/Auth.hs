@@ -4,7 +4,7 @@ import ClassyPrelude
 import Control.Monad.Catch (MonadThrow)
 import Data.Has
 import qualified Database.Redis as R
-import qualified Domain.Auth as D
+import qualified Domain.Auth.Types as D
 import Text.StringRandom (stringRandomIO)
 
 type State = R.Connection
