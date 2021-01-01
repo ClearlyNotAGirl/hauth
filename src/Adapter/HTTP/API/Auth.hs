@@ -40,5 +40,17 @@ routes = do
         status status400
         json ("Invalid code" :: Text)
       Right _ -> return ()
-  post "/api/auth/login" undefined
+  post "/api/auth/login" $ do
+    input <- parseAndValidateJSON authForm
+    domainResult <- lift $ login input
+    case domainResult of
+      Left LoginErrorInvalidAuth -> do
+        status status400
+        json ("Invalid auth"::Text)
+      Left LoginErrorEmailNotVerified -> do
+        status status400
+        json ("Email not verified"::Text)
+      Right sId -> do
+        setSessionIdInCookie sId
+        return ()
   get "/api/users" undefined
