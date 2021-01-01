@@ -17,6 +17,9 @@ authForm =
     emailForm = DF.validate (toResult . mkEmail) (DF.text Nothing)
     passwordForm = DF.validate (toResult . mkPassword) (DF.text Nothing)
 
+verifyEmailForm :: (Monad m) => DF.Form [Text] m VerificationCode
+verifyEmailForm = DF.text Nothing
+
 routes ::
   (ScottyError e, MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m) =>
   ScottyT e m ()
@@ -29,6 +32,13 @@ routes = do
         status status400
         json ("EmailTaken" :: Text)
       Right _ -> return ()
-  post "/api/auth/verifyEmail" undefined
+  post "/api/auth/verifyEmail" $ do
+    input <- parseAndValidateJSON verifyEmailForm
+    domainResult <- lift $ verifyEmail input
+    case domainResult of
+      Left EmailVerificationErrorInvalidCode -> do
+        status status400
+        json ("Invalid code" :: Text)
+      Right _ -> return ()
   post "/api/auth/login" undefined
   get "/api/users" undefined
