@@ -17,13 +17,13 @@ newtype Email = Email {emailRaw :: Text} deriving (Show, Eq, Ord)
 rawEmail :: Email -> Text
 rawEmail = emailRaw
 
-mkEmail :: Text -> Either [EmailValidationErr] Email
+mkEmail :: Text -> Either [Text] Email
 mkEmail =
   validate
     Email
     [ regexMatches
-        [re|^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$|]
-        EmailValidationErrInvalidEmail
+        [re|^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,64}$|]
+        "Not a valid email"
     ]
 
 data EmailValidationErr = EmailValidationErrInvalidEmail deriving (Show, Eq)
@@ -35,14 +35,14 @@ newtype Password = Password {passwordRaw :: Text} deriving (Show, Eq)
 rawPassword :: Password -> Text
 rawPassword = passwordRaw
 
-mkPassword :: Text -> Either [PasswordValidationErr] Password
+mkPassword :: Text -> Either [Text] Password
 mkPassword =
   validate
     Password
-    [ lengthBetween 5 50 PasswordValidationErrLength,
-      regexMatches [re|\d|] PasswordValidationErrMustContainNumber,
-      regexMatches [re|[A-Z]|] PasswordValidationErrMustContainUpperCase,
-      regexMatches [re|[a-z]|] PasswordValidationErrMustContainLowerCase
+    [ lengthBetween 5 50 "Should between 5 and 50",
+      regexMatches [re|\d|] "Should contain number",
+      regexMatches [re|[A-Z]|] "Should contain uppercase letter",
+      regexMatches [re|[a-z]|] "Should contain lowercase letter"
     ]
 
 data PasswordValidationErr
@@ -128,4 +128,3 @@ class Monad m => SessionRepo m where
 
 resolveSessionId :: SessionRepo m => SessionId -> m (Maybe UserId)
 resolveSessionId = findUserIdBySessionId
-

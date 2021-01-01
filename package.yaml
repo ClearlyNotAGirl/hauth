@@ -39,6 +39,11 @@ dependencies:
 - exceptions
 - amqp
 - scotty
+- http-types
+- digestive-functors
+- digestive-functors-aeson
+- blaze-builder
+- cookie
 
 default-extensions:
 - NoImplicitPrelude

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 502f6c1b88097c5ae67d75faf9aab7d1e5bac7b492c1242f7b72430888435ebf
+-- hash: e2ec67649e90ae05eca4c1ebe03615ffacd357b416a3ce3f3dae2987614c3abb
 
 name:           hauth
 version:        0.1.0.0
@@ -27,6 +27,8 @@ source-repository head
 
 library
   exposed-modules:
+      Adapter.HTTP.API.Auth
+      Adapter.HTTP.Common
       Adapter.HTTP.Main
       Adapter.InMemory.Auth
       Adapter.PostgreSQL.Auth
@@ -45,10 +47,15 @@ library
       aeson
     , amqp
     , base >=4.7 && <5
+    , blaze-builder
     , classy-prelude
+    , cookie
     , data-has
+    , digestive-functors
+    , digestive-functors-aeson
     , exceptions
     , hedis
+    , http-types
     , katip
     , mtl
     , pcre-heavy
@@ -75,11 +82,16 @@ executable hauth-exe
       aeson
     , amqp
     , base >=4.7 && <5
+    , blaze-builder
     , classy-prelude
+    , cookie
     , data-has
+    , digestive-functors
+    , digestive-functors-aeson
     , exceptions
     , hauth
     , hedis
+    , http-types
     , katip
     , mtl
     , pcre-heavy
@@ -107,11 +119,16 @@ test-suite hauth-test
       aeson
     , amqp
     , base >=4.7 && <5
+    , blaze-builder
     , classy-prelude
+    , cookie
     , data-has
+    , digestive-functors
+    , digestive-functors-aeson
     , exceptions
     , hauth
     , hedis
+    , http-types
     , katip
     , mtl
     , pcre-heavy
