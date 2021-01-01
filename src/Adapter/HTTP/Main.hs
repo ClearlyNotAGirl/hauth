@@ -1,37 +1,25 @@
 module Adapter.HTTP.Main where
 
-import ClassyPrelude hiding (delete)
+import Domain.Auth
+import ClassyPrelude
 import Web.Scotty.Trans
+import Network.HTTP.Types.Status
+import qualified Adapter.HTTP.API.Auth as AuthAPI
+import Adapter.HTTP.Common
+import Katip
+import Network.Wai
+import Network.Wai.Middleware.Gzip
 
-main :: IO ()
-main = scottyT 3000 id routes
+type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
 
-routes :: (MonadIO m) => ScottyT LText m ()
+main :: WebContext m  => Int -> (m Response -> IO Response) -> IO ()
+main port runner = scottyT port runner routes
+
+routes :: WebContext m  => ScottyT LText m ()
 routes = do
-  get "/" $ text "Home!"
-  get "/hello/:name" $ do
-    name <- param "name"
-    text $ "hello, " <> name
-  post "/users" $ text "adding user"
-  put "/users/:id" $ text "updating user"
-  patch "/users/:id" $ text "partially updating user"
-  delete "/users/:id" $ text "deleting user"
-
-  get "/add/:p1/:p2" $ do
-    p1 <- param "p1"
-    p2 <- param "p2"
-    let sum = p1 + p2 :: Int
-    text $ concat ["Finishing adding. Result is ", fromStrict $ tshow sum]
-
-  get "/error" $
-    rescue
-      ( do
-          raise "Yolo"
-          text "More and more"
-      )
-      (\e -> text $ "alright, error was: " <> e)
-
-  matchAny "/admin" $ text "I don't care about your HTTP verb"
-  options (regex ".*") $ text "CORS usually use this"
-
-  notFound $ text "404"
+  middleware $ gzip $ def {gzipFiles = GzipCompress}
+  AuthAPI.routes
+  defaultHandler $ \e -> do
+    lift $ $(logTM) ErrorS $ "Unhandled error: " <> ls (showError e)
+    status status500
+    json ("InternalServerError"::Text)

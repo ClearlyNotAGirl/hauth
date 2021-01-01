@@ -44,6 +44,8 @@ dependencies:
 - digestive-functors-aeson
 - blaze-builder
 - cookie
+- wai
+- wai-extra
 
 default-extensions:
 - NoImplicitPrelude

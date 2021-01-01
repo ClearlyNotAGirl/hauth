@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e2ec67649e90ae05eca4c1ebe03615ffacd357b416a3ce3f3dae2987614c3abb
+-- hash: d0fe61425f3105994633f02e4b4cff65fa35b9b48d2292b6ce8c48e4fabc333b
 
 name:           hauth
 version:        0.1.0.0
@@ -68,6 +68,8 @@ library
     , template-haskell
     , time
     , time-lens
+    , wai
+    , wai-extra
   default-language: Haskell2010
 
 executable hauth-exe
@@ -104,6 +106,8 @@ executable hauth-exe
     , template-haskell
     , time
     , time-lens
+    , wai
+    , wai-extra
   default-language: Haskell2010
 
 test-suite hauth-test
@@ -141,4 +145,6 @@ test-suite hauth-test
     , template-haskell
     , time
     , time-lens
+    , wai
+    , wai-extra
   default-language: Haskell2010
