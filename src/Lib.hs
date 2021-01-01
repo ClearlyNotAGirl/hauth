@@ -5,6 +5,7 @@ import qualified Adapter.PostgreSQL.Auth as PG
 import qualified Adapter.RabbitMQ.Auth as MQAuth
 import qualified Adapter.RabbitMQ.Common as MQ
 import qualified Adapter.Redis.Auth as Redis
+import qualified Adapter.HTTP.Main as HTTP
 import ClassyPrelude
 import Control.Exception.Safe (MonadCatch)
 import Control.Monad.Catch (MonadThrow)
@@ -68,7 +69,7 @@ action = do
         Nothing -> pollNotif email
         Just vCode -> return vCode
 
-someFunc :: IO ()
+-- someFunc :: IO ()
 -- someFunc = do
 --   state <- newTVarIO M.initialState
 --   run state action
@@ -76,7 +77,7 @@ someFunc :: IO ()
 --   state <- newTVarIO M.initialState
 --   run le state action
 
-withState :: (LogEnv -> State -> IO ()) -> IO ()
+withState :: (Int -> LogEnv -> State -> IO ()) -> IO ()
 withState action =
   withKatip $ \le -> do
     mState <- newTVarIO M.initialState
@@ -84,7 +85,7 @@ withState action =
       Redis.withState redisCfg $ \redisState ->
         MQ.withState mqCfg 16 $ \mqState -> do
           let state = (pgState, redisState, mqState, mState)
-          action le state
+          action port le state
   where
     mqCfg = "amqp://guest:guest@localhost:5672/%2F"
     redisCfg = "redis://localhost:6379/0"
@@ -95,14 +96,11 @@ withState action =
           PG.configMaxOpenConnPerStripe = 5,
           PG.configIdleConnTimeout = 10
         }
-someFunc = withState $ \le state@(_, _, mqState, _) -> do
-  let runner = run le state
-  MQAuth.init mqState runner
-  runner action
+    port = 3000
 
-runKatip :: IO ()
-runKatip = withKatip $ \le ->
-  runKatipContextT le () mempty logSomething
+-- runKatip :: IO ()
+-- runKatip = withKatip $ \le ->
+--   runKatipContextT le () mempty logSomething
 
 withKatip :: (LogEnv -> IO a) -> IO a
 withKatip =
