@@ -53,4 +53,11 @@ routes = do
       Right sId -> do
         setSessionIdInCookie sId
         return ()
-  get "/api/users" undefined
+  get "/api/users" $ do
+    userId <- reqCurrentUserId
+    mayEmail <- lift $ getUser userId
+    case mayEmail of
+      Nothing ->
+        raise $ stringError "Should not happen: SessionId map to invalid UserId"
+      Just email ->
+        json $ rawEmail email
