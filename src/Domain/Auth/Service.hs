@@ -1,9 +1,9 @@
 module Domain.Auth.Service where
 
-import ClassyPrelude
-import Domain.Auth.Types
-import Control.Monad.Except
-import Katip
+import           ClassyPrelude
+import           Control.Monad.Except
+import           Domain.Auth.Types
+import           Katip
 
 class Monad m => AuthRepo m where
   addAuth :: Auth -> m (Either RegistrationError (UserId, VerificationCode))

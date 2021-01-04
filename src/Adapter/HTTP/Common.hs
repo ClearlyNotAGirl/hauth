@@ -1,17 +1,17 @@
 module Adapter.HTTP.Common where
 
-import Blaze.ByteString.Builder (toLazyByteString)
-import ClassyPrelude
-import Data.Aeson hiding (json)
-import Data.Time.Lens
-import Domain.Auth.Types
-import Network.HTTP.Types.Status
-import qualified Text.Digestive.Aeson as DF
-import qualified Text.Digestive.Form as DF
-import qualified Text.Digestive.Types as DF
-import Web.Cookie
-import Web.Scotty.Trans
-import Katip
+import           Blaze.ByteString.Builder  (toLazyByteString)
+import           ClassyPrelude
+import           Data.Aeson                hiding (json)
+import           Data.Time.Lens
+import           Domain.Auth.Types
+import           Katip
+import           Network.HTTP.Types.Status
+import qualified Text.Digestive.Aeson      as DF
+import qualified Text.Digestive.Form       as DF
+import qualified Text.Digestive.Types      as DF
+import           Web.Cookie
+import           Web.Scotty.Trans
 
 type WebContext m = (MonadIO m, KatipContext m, AuthService m)
 
@@ -49,7 +49,7 @@ getCurrentUserId :: (AuthService m, ScottyError e) => ActionT e m (Maybe UserId)
 getCurrentUserId = do
   maySessionId <- getCookie "sId"
   case maySessionId of
-    Nothing -> return Nothing
+    Nothing  -> return Nothing
     Just sId -> lift $ resolveSessionId sId
 
 errorResponse :: (ToJSON a) => a -> Value

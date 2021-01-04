@@ -1,15 +1,15 @@
 module Adapter.HTTP.API.Auth where
 
-import Adapter.HTTP.Common
-import ClassyPrelude
-import Data.Aeson hiding (json, (.:))
-import Domain.Auth.Types
-import Katip
-import Network.HTTP.Types.Status
-import Adapter.HTTP.API.Common
-import Text.Digestive.Form ((.:))
-import qualified Text.Digestive.Form as DF
-import Web.Scotty.Trans
+import           Adapter.HTTP.API.Common
+import           Adapter.HTTP.Common
+import           ClassyPrelude
+import           Data.Aeson                hiding (json, (.:))
+import           Domain.Auth.Types
+import           Katip
+import           Network.HTTP.Types.Status
+import           Text.Digestive.Form       ((.:))
+import qualified Text.Digestive.Form       as DF
+import           Web.Scotty.Trans
 
 authForm :: (Monad m) => DF.Form [Text] m Auth
 authForm =

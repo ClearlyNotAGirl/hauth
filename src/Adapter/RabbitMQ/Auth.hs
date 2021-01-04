@@ -1,17 +1,17 @@
 module Adapter.RabbitMQ.Auth where
 
-import qualified Adapter.InMemory.Auth as M
-import Adapter.RabbitMQ.Common
-import ClassyPrelude
-import Control.Exception.Safe
-import Data.Aeson
-import Data.Aeson.TH
-import qualified Domain.Auth.Types as D
-import Katip
-import Network.AMQP
+import qualified Adapter.InMemory.Auth   as M
+import           Adapter.RabbitMQ.Common
+import           ClassyPrelude
+import           Control.Exception.Safe
+import           Data.Aeson
+import           Data.Aeson.TH
+import qualified Domain.Auth.Types       as D
+import           Katip
+import           Network.AMQP
 
 data EmailVerificationPayload = EmailVerificationPayload
-  { emailVerificationPayloadEmail :: Text,
+  { emailVerificationPayloadEmail            :: Text,
     emailVerificationPayloadVerificationCode :: Text
   }
 
@@ -20,7 +20,7 @@ class Monad m => EmailVerificationSender m where
 
 $( let structName = fromMaybe "" . lastMay . splitElem '.' . show $ ''EmailVerificationPayload
        lowercaseFirst (x : xs) = toLower [x] <> xs
-       lowercaseFirst xs = xs
+       lowercaseFirst xs       = xs
        options =
          defaultOptions
            { fieldLabelModifier = lowercaseFirst . drop (length structName)

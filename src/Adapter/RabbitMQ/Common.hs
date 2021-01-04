@@ -1,16 +1,16 @@
 module Adapter.RabbitMQ.Common where
 
-import ClassyPrelude
-import Control.Concurrent (forkIO)
-import Control.Exception.Safe as CS (MonadCatch, tryAny)
-import Data.Aeson
-import Data.Has
-import Katip
-import Network.AMQP
+import           ClassyPrelude
+import           Control.Concurrent     (forkIO)
+import           Control.Exception.Safe as CS (MonadCatch, tryAny)
+import           Data.Aeson
+import           Data.Has
+import           Katip
+import           Network.AMQP
 
 data State = State
   { statePublisherChan :: Channel,
-    stateConsumerChan :: Channel
+    stateConsumerChan  :: Channel
   }
 
 type QueueAction a = State -> IO a

@@ -1,11 +1,11 @@
 module Adapter.Redis.Auth where
 
-import ClassyPrelude
-import Control.Monad.Catch (MonadThrow)
-import Data.Has
-import qualified Database.Redis as R
-import qualified Domain.Auth.Types as D
-import Text.StringRandom (stringRandomIO)
+import           ClassyPrelude
+import           Control.Monad.Catch (MonadThrow)
+import           Data.Has
+import qualified Database.Redis      as R
+import qualified Domain.Auth.Types   as D
+import           Text.StringRandom   (stringRandomIO)
 
 type State = R.Connection
 
@@ -35,11 +35,11 @@ newSession userId = do
   result <- withConn $ R.set (encodeUtf8 sId) (fromString . show $ userId)
   case result of
     Right R.Ok -> return sId
-    err -> throwString $ "Unexpected redis error: " <> show err
+    err        -> throwString $ "Unexpected redis error: " <> show err
 
 findUserIdBySessionId :: Redis r m => D.SessionId -> m (Maybe D.UserId)
 findUserIdBySessionId sId = do
   result <- withConn $ R.get (encodeUtf8 sId)
   case result of
     Right (Just uIdStr) -> return $ readMay . unpack . decodeUtf8 $ uIdStr
-    err -> throwString $ "Unexpected redis error: " <> show err
+    err                 -> throwString $ "Unexpected redis error: " <> show err

@@ -1,14 +1,14 @@
 module Adapter.HTTP.API.Main where
 
-import Domain.Auth.Types
-import ClassyPrelude
-import Web.Scotty.Trans
-import Network.HTTP.Types.Status
-import qualified Adapter.HTTP.API.Auth as AuthAPI
-import Adapter.HTTP.Common
-import Katip
-import Network.Wai
-import Network.Wai.Middleware.Gzip
+import qualified Adapter.HTTP.API.Auth       as AuthAPI
+import           Adapter.HTTP.Common
+import           ClassyPrelude
+import           Domain.Auth.Types
+import           Katip
+import           Network.HTTP.Types.Status
+import           Network.Wai
+import           Network.Wai.Middleware.Gzip
+import           Web.Scotty.Trans
 
 main :: WebContext m  => (m Response -> IO Response) -> IO Application
 main runner = scottyAppT runner routes

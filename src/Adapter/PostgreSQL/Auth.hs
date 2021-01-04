@@ -1,14 +1,14 @@
 module Adapter.PostgreSQL.Auth where
 
-import ClassyPrelude
-import Control.Monad.Catch (MonadThrow)
-import Data.Has
-import Data.Pool
-import Data.Time
-import Database.PostgreSQL.Simple
-import Database.PostgreSQL.Simple.Migration
-import qualified Domain.Auth.Types as D
-import Text.StringRandom
+import           ClassyPrelude
+import           Control.Monad.Catch                  (MonadThrow)
+import           Data.Has
+import           Data.Pool
+import           Data.Time
+import           Database.PostgreSQL.Simple
+import           Database.PostgreSQL.Simple.Migration
+import qualified Domain.Auth.Types                    as D
+import           Text.StringRandom
 
 type State = Pool Connection
 
@@ -19,7 +19,7 @@ migrate pool = withResource pool $ \conn -> do
   result <- withTransaction conn (runMigrations False conn cmds)
   case result of
     MigrationError err -> throwString err
-    _ -> return ()
+    _                  -> return ()
   where
     cmds =
       [ MigrationInitialization,
@@ -27,10 +27,10 @@ migrate pool = withResource pool $ \conn -> do
       ]
 
 data Config = Config
-  { configUrl :: ByteString,
-    configStripeCount :: Int,
+  { configUrl                  :: ByteString,
+    configStripeCount          :: Int,
     configMaxOpenConnPerStripe :: Int,
-    configIdleConnTimeout :: NominalDiffTime
+    configIdleConnTimeout      :: NominalDiffTime
   }
 
 withPool :: Config -> DbAction a -> IO a
@@ -105,7 +105,7 @@ findUserByAuth (D.Auth email pass) = do
   result <- withConn $ \conn -> query conn qry (rawEmail, rawPass)
   return $ case result of
     [(uId, isVerified)] -> Just (uId, isVerified)
-    _ -> Nothing
+    _                   -> Nothing
   where
     qry =
       "select id, is_email_verified \

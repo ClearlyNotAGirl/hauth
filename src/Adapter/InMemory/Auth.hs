@@ -1,18 +1,18 @@
 module Adapter.InMemory.Auth where
 
-import ClassyPrelude
-import Control.Monad.Except
-import Data.Has
-import qualified Domain.Auth.Types as D
-import Text.StringRandom
+import           ClassyPrelude
+import           Control.Monad.Except
+import           Data.Has
+import qualified Domain.Auth.Types    as D
+import           Text.StringRandom
 
 data State = State
-  { stateAuths :: [(D.UserId, D.Auth)],
+  { stateAuths            :: [(D.UserId, D.Auth)],
     stateUnverifiedEmails :: Map D.VerificationCode D.Email,
-    stateVerifiedEmails :: Set D.Email,
-    stateUserIdCounter :: Int,
-    stateNotifications :: Map D.Email D.VerificationCode,
-    stateSessions :: Map D.SessionId D.UserId
+    stateVerifiedEmails   :: Set D.Email,
+    stateUserIdCounter    :: Int,
+    stateNotifications    :: Map D.Email D.VerificationCode,
+    stateSessions         :: Map D.SessionId D.UserId
   }
   deriving (Show, Eq)
 
@@ -55,7 +55,7 @@ addAuth auth = do
     return (newUserId, vCode)
 
 orThrow :: MonadError e m => Maybe a -> e -> m a
-orThrow Nothing e = throwError e
+orThrow Nothing e  = throwError e
 orThrow (Just a) _ = return a
 
 setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError (D.UserId, D.Email))

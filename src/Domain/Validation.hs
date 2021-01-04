@@ -1,14 +1,14 @@
 module Domain.Validation where
 
-import ClassyPrelude
-import Text.Regex.PCRE.Heavy
+import           ClassyPrelude
+import           Text.Regex.PCRE.Heavy
 
 type Validation e a = a -> Maybe e
 
 validate :: (a -> b) -> [Validation e a] -> a -> Either [e] b
 validate builder validations value =
   case concatMap (\f -> maybeToList $ f value) validations of
-    [] -> Right $ builder value
+    []   -> Right $ builder value
     errs -> Left errs
 
 rangeBetween :: (Ord a) => a -> a -> e -> Validation e a
