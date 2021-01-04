@@ -16,8 +16,7 @@ type ConnectionString = String
 withState :: ConnectionString -> DbAction a -> IO a
 withState connUrl action = do
   case R.parseConnectInfo connUrl of
-    Left _ ->
-      throwString "Invalid Redis conn URL"
+    Left _ -> throwString "Invalid Redis conn URL"
     Right connInfo -> do
       conn <- R.checkedConnect connInfo
       action conn

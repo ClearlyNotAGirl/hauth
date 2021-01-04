@@ -12,5 +12,4 @@ main runner = scottyAppT runner routes
 
 routes :: WebContext m => ScottyT LText m ()
 routes = do
-    get "/" $ do
-        text "Hello from web!"
+  get "/" $ do text "Hello from web!"

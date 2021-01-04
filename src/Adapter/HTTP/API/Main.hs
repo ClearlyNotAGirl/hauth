@@ -10,19 +10,17 @@ import           Network.Wai
 import           Network.Wai.Middleware.Gzip
 import           Web.Scotty.Trans
 
-main :: WebContext m  => (m Response -> IO Response) -> IO Application
+main :: WebContext m => (m Response -> IO Response) -> IO Application
 main runner = scottyAppT runner routes
 
-routes :: WebContext m  => ScottyT LText m ()
+routes :: WebContext m => ScottyT LText m ()
 routes = do
   middleware $ gzip $ def {gzipFiles = GzipCompress}
   AuthAPI.routes
-
   notFound $ do
     status status404
     json $ errorResponse ("NotFound" :: Text)
-
   defaultHandler $ \e -> do
     lift $ $(logTM) ErrorS $ "Unhandled error: " <> ls (showError e)
     status status500
-    json ("InternalServerError"::Text)
+    json ("InternalServerError" :: Text)

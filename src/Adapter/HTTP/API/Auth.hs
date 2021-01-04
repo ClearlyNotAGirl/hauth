@@ -12,8 +12,7 @@ import qualified Text.Digestive.Form       as DF
 import           Web.Scotty.Trans
 
 authForm :: (Monad m) => DF.Form [Text] m Auth
-authForm =
-  Auth <$> "email" .: emailForm <*> "password" .: passwordForm
+authForm = Auth <$> "email" .: emailForm <*> "password" .: passwordForm
   where
     emailForm = DF.validate (toResult . mkEmail) (DF.text Nothing)
     passwordForm = DF.validate (toResult . mkPassword) (DF.text Nothing)
@@ -22,8 +21,7 @@ verifyEmailForm :: (Monad m) => DF.Form [Text] m VerificationCode
 verifyEmailForm = DF.text Nothing
 
 routes ::
-  (ScottyError e, MonadIO m, KatipContext m, AuthService m) =>
-  ScottyT e m ()
+     (ScottyError e, MonadIO m, KatipContext m, AuthService m) => ScottyT e m ()
 routes = do
   post "/api/auth/register" $ do
     input <- parseAndValidateJSON authForm
@@ -47,10 +45,10 @@ routes = do
     case domainResult of
       Left LoginErrorInvalidAuth -> do
         status status400
-        json ("Invalid auth"::Text)
+        json ("Invalid auth" :: Text)
       Left LoginErrorEmailNotVerified -> do
         status status400
-        json ("Email not verified"::Text)
+        json ("Email not verified" :: Text)
       Right sId -> do
         setSessionIdInCookie sId
         return ()
@@ -60,5 +58,4 @@ routes = do
     case mayEmail of
       Nothing ->
         raise $ stringError "Should not happen: SessionId map to invalid UserId"
-      Just email ->
-        json $ rawEmail email
+      Just email -> json $ rawEmail email

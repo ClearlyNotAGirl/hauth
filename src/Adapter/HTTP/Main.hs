@@ -12,11 +12,10 @@ import           Web.Scotty
 import           Web.Scotty.Trans
 
 -- type WebContext m = (MonadIO m, KatipContext m, AuthRepo m, EmailVerificationNotifier m, SessionRepo m)
-
 main :: WebContext m => Int -> (m Response -> IO Response) -> IO ()
 main port runner = do
-    web <- Web.main runner
-    api <- API.main runner
-    run port $ vhost [(pathBeginsWith "api",api)] web
-    where
-        pathBeginsWith path req = headMay (pathInfo req) == Just path
+  web <- Web.main runner
+  api <- API.main runner
+  run port $ vhost [(pathBeginsWith "api", api)] web
+  where
+    pathBeginsWith path req = headMay (pathInfo req) == Just path

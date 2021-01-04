@@ -6,30 +6,34 @@ import           Data.Has
 import qualified Domain.Auth.Types    as D
 import           Text.StringRandom
 
-data State = State
-  { stateAuths            :: [(D.UserId, D.Auth)],
-    stateUnverifiedEmails :: Map D.VerificationCode D.Email,
-    stateVerifiedEmails   :: Set D.Email,
-    stateUserIdCounter    :: Int,
-    stateNotifications    :: Map D.Email D.VerificationCode,
-    stateSessions         :: Map D.SessionId D.UserId
-  }
+data State =
+  State
+    { stateAuths            :: [(D.UserId, D.Auth)]
+    , stateUnverifiedEmails :: Map D.VerificationCode D.Email
+    , stateVerifiedEmails   :: Set D.Email
+    , stateUserIdCounter    :: Int
+    , stateNotifications    :: Map D.Email D.VerificationCode
+    , stateSessions         :: Map D.SessionId D.UserId
+    }
   deriving (Show, Eq)
 
 initialState :: State
 initialState =
   State
-    { stateAuths = [],
-      stateUnverifiedEmails = mempty,
-      stateVerifiedEmails = mempty,
-      stateUserIdCounter = 0,
-      stateNotifications = mempty,
-      stateSessions = mempty
+    { stateAuths = []
+    , stateUnverifiedEmails = mempty
+    , stateVerifiedEmails = mempty
+    , stateUserIdCounter = 0
+    , stateNotifications = mempty
+    , stateSessions = mempty
     }
 
 type InMemory r m = (Has (TVar State) r, MonadReader r m, MonadIO m)
 
-addAuth :: InMemory r m => D.Auth -> m (Either D.RegistrationError (D.UserId, D.VerificationCode))
+addAuth ::
+     InMemory r m
+  => D.Auth
+  -> m (Either D.RegistrationError (D.UserId, D.VerificationCode))
 addAuth auth = do
   tvar <- asks getter
   vCode <- liftIO $ stringRandomIO "[A-Za-z0-9]{16}"
@@ -46,9 +50,9 @@ addAuth auth = do
         newUnverified = insertMap vCode email unverifieds
         newState =
           state
-            { stateAuths = newAuths,
-              stateUserIdCounter = newUserId,
-              stateUnverifiedEmails = newUnverified
+            { stateAuths = newAuths
+            , stateUserIdCounter = newUserId
+            , stateUnverifiedEmails = newUnverified
             }
     lift $ writeTVar tvar newState
     -- return vCode
@@ -58,7 +62,10 @@ orThrow :: MonadError e m => Maybe a -> e -> m a
 orThrow Nothing e  = throwError e
 orThrow (Just a) _ = return a
 
-setEmailAsVerified :: InMemory r m => D.VerificationCode -> m (Either D.EmailVerificationError (D.UserId, D.Email))
+setEmailAsVerified ::
+     InMemory r m
+  => D.VerificationCode
+  -> m (Either D.EmailVerificationError (D.UserId, D.Email))
 setEmailAsVerified vCode = do
   tvar <- asks getter
   atomically . runExceptT $ do
@@ -74,15 +81,14 @@ setEmailAsVerified vCode = do
         newUnverified = deleteMap vCode unverifiedEmails
         newState =
           state
-            { stateUnverifiedEmails = newUnverified,
-              stateVerifiedEmails = newVerified
+            { stateUnverifiedEmails = newUnverified
+            , stateVerifiedEmails = newVerified
             }
     lift $ writeTVar tvar newState
     return (uId, email)
 
 -- setEmailAsVerified :: TVar State -> D.VerificationCode -> IO (Either D.EmailVerificationError ())
 -- setEmailAsVerified vCode = do
-
 findUserByAuth :: InMemory r m => D.Auth -> m (Maybe (D.UserId, Bool))
 findUserByAuth auth = do
   tvar <- asks getter
@@ -130,7 +136,8 @@ findUserIdBySessionId sId = do
   tvar <- asks getter
   liftIO $ lookup sId . stateSessions <$> readTVarIO tvar
 
-getNotificationsForEmail :: InMemory r m => D.Email -> m (Maybe D.VerificationCode)
+getNotificationsForEmail ::
+     InMemory r m => D.Email -> m (Maybe D.VerificationCode)
 getNotificationsForEmail email = do
   tvar <- asks getter
   state <- liftIO $ readTVarIO tvar

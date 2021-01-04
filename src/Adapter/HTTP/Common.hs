@@ -31,18 +31,19 @@ getCookie key = do
     val <- lookup bsKey cookie
     return $ decodeUtf8 val
 
-setSessionIdInCookie :: (MonadIO m, ScottyError e) => SessionId -> ActionT e m ()
+setSessionIdInCookie ::
+     (MonadIO m, ScottyError e) => SessionId -> ActionT e m ()
 setSessionIdInCookie sId = do
   curTime <- liftIO getCurrentTime
   setCookie $
     def
-      { setCookieName = "sId",
-        setCookiePath = Just "/",
-        setCookieValue = encodeUtf8 sId,
-        setCookieExpires = Just $ modL month (+ 1) curTime,
-        setCookieHttpOnly = True,
-        setCookieSecure = False,
-        setCookieSameSite = Just sameSiteLax
+      { setCookieName = "sId"
+      , setCookiePath = Just "/"
+      , setCookieValue = encodeUtf8 sId
+      , setCookieExpires = Just $ modL month (+ 1) curTime
+      , setCookieHttpOnly = True
+      , setCookieSecure = False
+      , setCookieSameSite = Just sameSiteLax
       }
 
 getCurrentUserId :: (AuthService m, ScottyError e) => ActionT e m (Maybe UserId)

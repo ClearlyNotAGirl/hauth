@@ -10,7 +10,8 @@ import qualified Text.Digestive.Form       as DF
 import qualified Text.Digestive.Types      as DF
 import           Web.Scotty.Trans
 
-parseAndValidateJSON :: (ScottyError e, MonadIO m, ToJSON v) => DF.Form v m a -> ActionT e m a
+parseAndValidateJSON ::
+     (ScottyError e, MonadIO m, ToJSON v) => DF.Form v m a -> ActionT e m a
 parseAndValidateJSON form = do
   val <- jsonData `rescue` (\_ -> return Null)
   validationResult <- lift $ DF.digestJSON form val
@@ -19,8 +20,7 @@ parseAndValidateJSON form = do
       status status400
       json $ DF.jsonErrors v
       finish
-    (_, Just result) ->
-      return result
+    (_, Just result) -> return result
 
 reqCurrentUserId :: (AuthService m, ScottyError e) => ActionT e m UserId
 reqCurrentUserId = do

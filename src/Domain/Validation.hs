@@ -13,7 +13,9 @@ validate builder validations value =
 
 rangeBetween :: (Ord a) => a -> a -> e -> Validation e a
 rangeBetween min max msg val =
-  if val >= min && val <= max then Nothing else Just msg
+  if val >= min && val <= max
+    then Nothing
+    else Just msg
 
 lengthBetween :: (MonoFoldable a) => Int -> Int -> e -> Validation e a
 lengthBetween minLen maxLen msg val =
@@ -21,5 +23,6 @@ lengthBetween minLen maxLen msg val =
 
 regexMatches :: Regex -> e -> Validation e Text
 regexMatches regex msg val =
-  if val =~ regex then Nothing else Just msg
-
+  if val =~ regex
+    then Nothing
+    else Just msg
